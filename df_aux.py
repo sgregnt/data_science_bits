@@ -8,6 +8,8 @@ import os
 # - run an apply wrapper on data frame column, with converting a date (e.g., 2015-01-01) into ordinary data.
 # - use index object of data frame to get data frame length (see page 99 in Python Data Science Handbook.)
 # - save and load "formula" (treated as numpy object) following adopted name convention
+# - calculate running mean
+
 
 def df_unique_unit(df, func):
 
@@ -23,12 +25,27 @@ def df_unique_date(df, func):
 
     return df
 
-def df_group_accupancy_by_column(df, col, func):
+
+def running_mean(x, n):
+
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+
+    return (cumsum[n:] - cumsum[:-n]) / float(n)
+
+
+def df_group_accupancy_by_column(df, col, func, target_col):
+    """Wrapper to aggregate statistics of target_col
+    for groups defined by col"""
+
+    df = df.groupby(col).aggregate(func)
+    return df.index, df[target_col]
+
+def df_group_accupancy_by_column(df, col, func, target_col):
 
     df = df.groupby(col).aggregate(func)  
     n = len(df.index)
     
-    return df.index, df['dim_is_requested']
+    return df.index, df[target_col]
 
 def save_formula(formula, name='all_cities', size='full', suffix='raw'):    
     
